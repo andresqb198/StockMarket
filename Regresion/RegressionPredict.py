@@ -7,10 +7,11 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 from matplotlib import style
 import datetime as datetime
+import pickle
 
 style.use('ggplot')
 
-s_and_p_500 = pd.read_csv('D:\ProyectoModelos\s_and_p_500.csv', parse_dates = True, index_col = 0)
+s_and_p_500 = pd.read_csv('s_and_p_500.csv', parse_dates = True, index_col = 0)
 
 plt.figure(1)
 s_and_p_500['Close'].plot()
@@ -30,6 +31,8 @@ columna_pronostico = 'Close'
 salida_pronostico = int(math.ceil(0.01*len(df)))
 df['etiqueta'] = df[columna_pronostico].shift(-salida_pronostico)
 
+df.to_csv('2nds_and_p_500.csv')
+
 X = np.array(df.drop(['etiqueta'],1))
 X = preprocessing.scale(X)
 X= X[:-salida_pronostico]
@@ -37,13 +40,17 @@ X_lately= X[-salida_pronostico:]
 
 df.dropna(inplace=True)
 y = np.array(df['etiqueta'])
-y = np.array(df['etiqueta'])
-
 X_train, X_test, y_train, y_test = model_selection.train_test_split(X,y,test_size=0.2)
-clf = LinearRegression()
-clf.fit(X_train,y_train)
-exactitud = clf.score(X_test,y_test)
 
+
+##clf = LinearRegression()
+##clf.fit(X_train,y_train)
+##with open('linearregression.pickle','wb') as f:
+##    pickle.dump(clf,f)
+pickle_in = open('linearregression.pickle','rb')
+clf = pickle.load(pickle_in)
+
+exactitud = clf.score(X_test,y_test)
 conjunto_pronostico = clf.predict(X_lately)
 
 print(conjunto_pronostico, exactitud,salida_pronostico)
